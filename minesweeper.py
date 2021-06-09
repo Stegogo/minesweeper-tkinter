@@ -13,8 +13,10 @@ mines = 10
 field = []
 buttons = []
 isGameOver = False
+
 # Cell colors
-colors = ['#FFF8B0', '#0000FF', '#1688FF', '#FF0000', '#000084', '#F60237', '#FFC600', '#FF0085', '#5C0500']
+colors = ['#FFFFFF', '#0000FF', '#1688FF', '#FF0000', '#000084', '#F60237', '#FFC600', '#FF0085', '#5C0500', "#8AC3FF", '#000000', '#6D6D6D']
+        #activategdbg,   1,         2,          3,        4,        5,          6,          7,        8,      closedbg,    mine,      flag
 # Font
 myFont = font.Font(family='Arial', weight="bold")
 # Path
@@ -28,6 +30,28 @@ def saveAndQuit():
         File.saveGameField(File)
     root.destroy()
 
+def setColors(theme):
+    global colors
+    if theme == 'darkpink':
+        colors = ['#30102D', '#00F1F2', '#007BFC', '#E4266C', '#B15EDE', '#6E3A7C', '#D862C1', '#003399', '#003399', '#16090F', '#CF4EAB', '#FF005D']
+    elif theme == 'darklava':
+        colors = ['#FF8A00', '#330000', '#A60000', '#1A0000', '#16090F', '#911710', '#3B003B', '#FFFFFF', '#FFD900', '#1A0000', '#E2A35C', '#FF4900']
+    elif theme == 'lightlime':
+        colors = ['#FFFFFF', '#31A100', '#4B7000', '#FF0000', '#000084', '#0E499F', '#0B2F4A', '#0B4A35', '#0672E3', "#BDDE48", '#000000', '#005E70']
+    else:
+        colors = ['#FFFFFF', '#0000FF', '#1688FF', '#FF0000', '#000084', '#F60237', '#FFC600', '#FF0085', '#5C0500', "#8AC3FF", '#000000', '#6D6D6D']
+    for x in range(rows):
+        for y in range(columns):
+            if buttons[x][y]["state"] == "normal" or buttons[x][y]["text"] == "⚑" or buttons[x][y]["text"] == "?":
+                buttons[x][y].config(bg=colors[9])
+                buttons[x][y].config(disabledforeground=colors[11])
+            elif buttons[x][y]["text"] == "✱":
+                buttons[x][y].config(disabledforeground=colors[10])
+                buttons[x][y].config(bg=colors[0])
+            else:
+                buttons[x][y].config(bg=colors[0])
+                buttons[x][y].config(disabledforeground=colors[field[x][y]])
+
 def createMenu():
     """This creates context menus"""
 
@@ -36,9 +60,16 @@ def createMenu():
     menuField.add_command(label="Normal: 16х16, 40 мин", command=lambda: setSize(16, 16, 40))
     menuField.add_command(label="Hard: 16х30, 99 мин", command=lambda: setSize(16, 30, 99))
 
+    menuTheme = tkinter.Menu(root, tearoff=0)
+    menuTheme.add_command(label="Light", command=lambda: setColors('light'))
+    menuTheme.add_command(label="Light Lime", command=lambda: setColors('lightlime'))
+    menuTheme.add_command(label="Dark Pink&Blue", command=lambda: setColors('darkpink'))
+    menuTheme.add_command(label="Dark Lava", command=lambda: setColors('darklava'))
+
     menuBar = tkinter.Menu(root)
     menuBar.add_cascade(label="Field", menu=menuField)
     menuBar.add_command(label="Rating", command=lambda: showRating())
+    menuBar.add_cascade(label="Theme", menu=menuTheme)
     menuBar.add_command(label="Quit", command=lambda: saveAndQuit())
     root.config(menu=menuBar)
 
@@ -198,7 +229,7 @@ def prepareWindow():
     for x in range(0, rows):
         buttons.append([])
         for y in range(0, columns):
-            b = tkinter.Button(root, text=" ", bg="#C9C9C9", pady=0, padx=0, width=2, font=myFont, command=lambda x=x, y=y: Cell.clickOn(Cell, x, y)) #clickOn(x, y)
+            b = tkinter.Button(root, text=" ", bg=colors[9], pady=0, padx=0, width=2, font=myFont, borderwidth=0, command=lambda x=x, y=y: Cell.clickOn(Cell, x, y)) #clickOn(x, y)
             b.bind("<Button-3>", lambda e, x=x, y=y: Cell.onRightClick(Cell, x, y))
             b.grid(row=x + 1, column=y, sticky=tkinter.N + tkinter.W + tkinter.S + tkinter.E)
             buttons[x].append(b)
@@ -234,7 +265,7 @@ def checkWin():
         os.remove(saveDir + File.playerName + "_game.bin")
         os.remove(saveDir + File.playerName + "_cells.bin")
         Player.p.config(text=Player.faces[2])
-        tkinter.messagebox.showinfo("YAY!", "Good job!!")
+        tkinter.messagebox.showinfo("Victory!", "Good job!!")
 
 
 # CLASSES:
@@ -492,13 +523,14 @@ class Cell:
                 for _y in range(columns):
                     if field[_x][_y] == 9:
                         buttons[_x][_y]["text"] = "✱"
+                        buttons[_x][_y]["fg"] = colors[10]
         else:
             buttons[x][y].config(disabledforeground=colors[field[x][y]])
         if field[x][y] == 0:
             buttons[x][y]["text"] = " "
             self.autoClickOn(self, x, y)
         buttons[x][y]['state'] = 'disabled'
-        buttons[x][y].config(bg='white')
+        buttons[x][y].config(bg=colors[0])
         buttons[x][y].config(relief=tkinter.GROOVE)
         File.saveGameField(File)
         checkWin()
@@ -508,16 +540,16 @@ class Cell:
 
         if field[x][y] != 9:
 
-            if buttons[x][y]["state"] == "disabled": 
+            if buttons[x][y]["state"] == "disabled":
                 return
-            if field[x][y] != 0: 
+            if field[x][y] != 0:
                 buttons[x][y]["text"] = str(field[x][y])
             else:
                 buttons[x][y]["text"] = " "
             buttons[x][y].config(disabledforeground=colors[field[x][y]])
             buttons[x][y].config(relief=tkinter.GROOVE)
             buttons[x][y]['state'] = 'disabled'
-            buttons[x][y].config(bg='white')
+            buttons[x][y].config(bg=colors[0])
             if field[x][y] == 0:
                 if x != 0 and y != 0:
                     self.autoClickOn(self, x - 1, y - 1)
@@ -542,14 +574,19 @@ class Cell:
         if buttons[x][y]["relief"] != tkinter.GROOVE:
             if buttons[x][y]["text"] == " " and buttons[x][y]["state"] == "normal":
                 buttons[x][y]["text"] = "⚑"
+                buttons[x][y].config(disabledforeground=colors[11])
                 buttons[x][y]["state"] = "disabled"
                 File.saveGameField(File)
+
             elif buttons[x][y]["text"] == "⚑":
                 buttons[x][y]["text"] = "?"
+                buttons[x][y].config(disabledforeground=colors[11])
                 File.saveGameField(File)
+
             else:
                 buttons[x][y]["text"] = " "
                 buttons[x][y]["state"] = "normal"
+                buttons[x][y].config(disabledforeground=colors[field[x][y]])
                 File.saveGameField(File)
 
 class Player:
