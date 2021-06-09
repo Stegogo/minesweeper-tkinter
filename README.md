@@ -1,7 +1,6 @@
 <div align="center">
 	<img src="https://user-images.githubusercontent.com/73101718/121400531-6268a280-c960-11eb-994d-1aad4e6c89ef.png">
-	<p>University assigment</p>
-	<p>Minesweeper game (Python + TKinter)</p>
+	<p>University assigment: Minesweeper game (Python + TKinter)</p>
 	<p>Features:</p>
 			* Three game difficulties (Novice, Intermediate, Master) <br>
 			* Player login <br>
